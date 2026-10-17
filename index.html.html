@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Imóveis Desocupando</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--tx:#1b1f24;--mut:#6b7280;--bd:#e3e6ea;--pri:#0b5fff;--priTx:#fff;--ok:#157f3b;--okBg:#e1f5e8;--wa:#8a5a00;--waBg:#fff1d6;--no:#a32020;--noBg:#fde4e4;--inf:#14558f;--infBg:#e0eefb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111317;--card:#1b1e24;--tx:#eceef1;--mut:#9aa1ab;--bd:#2c3038;--pri:#5b92ff;--priTx:#0b1020;--ok:#6fdc96;--okBg:#173323;--wa:#f2c46a;--waBg:#3a2e12;--no:#ff9b9b;--noBg:#3d1b1b;--inf:#8cc4f5;--infBg:#132a3f}}
+:root[data-theme="dark"]{--bg:#111317;--card:#1b1e24;--tx:#eceef1;--mut:#9aa1ab;--bd:#2c3038;--pri:#5b92ff;--priTx:#0b1020;--ok:#6fdc96;--okBg:#173323;--wa:#f2c46a;--waBg:#3a2e12;--no:#ff9b9b;--noBg:#3d1b1b;--inf:#8cc4f5;--infBg:#132a3f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:720px;margin:0 auto;padding:12px}
+h1{font-size:18px;margin:4px 0 10px}
+.up{background:var(--card);border:2px dashed var(--bd);border-radius:14px;padding:18px;text-align:center}
+.up p{margin:6px 0 0;color:var(--mut);font-size:13px}
+.btn{display:inline-block;background:var(--pri);color:var(--priTx);border:0;border-radius:10px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer}
+.btn.sec{background:transparent;color:var(--pri);border:1px solid var(--bd);padding:8px 12px;font-size:13px}
+.pick{position:relative;display:inline-block;overflow:hidden}.pick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:100px}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chip.q.on{background:#e8590c;border-color:#e8590c;color:#fff}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:8px 0}
+.srch{width:100%;padding:13px 14px;font-size:16px;border:1px solid var(--bd);border-radius:12px;background:var(--card);color:var(--tx)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px;scrollbar-width:none}
+.chip{flex:none;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:99px;padding:6px 12px;font-size:13px;cursor:pointer}
+.chip.on{background:var(--pri);color:var(--priTx);border-color:var(--pri)}
+.sel{display:flex;gap:6px;padding-top:6px}
+.sel select{flex:1;min-width:0;padding:9px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font-size:14px}
+.meta{display:flex;justify-content:space-between;align-items:center;color:var(--mut);font-size:12px;margin:6px 2px 8px;gap:8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:10px}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.pasta{font-size:12px;color:var(--mut);font-weight:600}
+.end{font-weight:650;font-size:16px;margin:2px 0 4px;word-break:break-word}
+.badge{flex:none;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--infBg);color:var(--inf);text-align:right}
+.badge.ok{background:var(--okBg);color:var(--ok)}.badge.wa{background:var(--waBg);color:var(--wa)}.badge.no{background:var(--noBg);color:var(--no)}
+.sub{color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:10px}
+.grid div span{display:block;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em}
+.grid div b{font-weight:600;word-break:break-word}
+details{margin-top:10px;border-top:1px solid var(--bd);padding-top:8px}
+summary{cursor:pointer;color:var(--pri);font-weight:600;font-size:14px}
+.det div{margin-top:8px;font-size:14px}.det span{display:block;font-size:11px;color:var(--mut);text-transform:uppercase}
+.det a{color:var(--pri);font-weight:600;text-decoration:none}
+.empty{text-align:center;color:var(--mut);padding:30px 10px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd"><h1>🏠 Imóveis Desocupando</h1><button class="btn sec" id="themeBtn" type="button">🌙 Escuro</button></div>
+
+  <div id="upBox" class="up">
+    <span class="btn pick">📂 Selecionar planilha (.xlsx)<input id="f" type="file"></span>
+    <p>Envie a planilha atualizada do dia. Ela é lida só no seu aparelho.</p>
+  </div>
+
+  <div id="app" class="hide">
+    <div class="bar">
+      <input id="q" class="srch" type="search" placeholder="Buscar endereço, edifício, nº pasta, nome…" autocomplete="off">
+      <div id="quick" class="chips"></div>
+      <div id="chips" class="chips"></div>
+      <div class="sel"><select id="tipo"></select><select id="mes"></select></div>
+    </div>
+    <div class="meta"><span id="cnt"></span><button class="btn sec" id="swap" type="button">Trocar planilha</button></div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').replace(/\s+/g,' ').trim();
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const COLS={pasta:'n pasta',mes:'mes',aviso:'data do aviso',status:'status',chaves:'data de entrega',end:'imovel',tipo:'tipo',vdes:'valor desocupacao',vloc:'valor nova locacao',vven:'valor venda',iptu:'iptu',cond:'condominio',prop:'proprietario',tprop:'telefone prop',inq:'inquilino',tinq:'telefone inq',rep:'reparos',mrep:'motivo reparos',srep:'status reparos',obs:'observacao'};
+let rows=[],state={status:'',tipo:'',mes:'',q:'',hoje:''},stamp='';
+
+function fDate(v){if(v instanceof Date&&!isNaN(v))return v.toLocaleDateString('pt-BR');return v?String(v):''}
+function fMoney(v){if(v===''||v==null)return '';if(typeof v==='number')return v?v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'';return String(v)}
+function tel(v){if(!v)return '';const s=String(v),d=s.replace(/\D/g,'');const link=d.length>=10&&d.length<=11?`<a href="tel:${d}">📞 ${esc(s)}</a> · <a href="https://wa.me/55${d}" target="_blank" rel="noopener">WhatsApp</a>`:esc(s);return link}
+function badgeCls(s){const n=norm(s);return n.includes('entregue')?'ok':n.includes('cancel')?'no':n.includes('notifica')?'wa':''}
+function cleanStatus(s){return String(s||'').trim()}
+
+function parse(wb){
+  const ws=wb.Sheets['CORRETORES']||wb.Sheets[wb.SheetNames[0]];
+  const json=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});
+  if(!json.length)throw new Error('Planilha vazia');
+  const heads=Object.keys(json[0]);const map={};
+  for(const k in COLS){map[k]=heads.find(h=>norm(h).startsWith(COLS[k]))}
+  const out=[];
+  json.forEach(r=>{
+    const o={};for(const k in map)o[k]=map[k]?r[map[k]]:'';
+    if(!String(o.end).trim()&&!String(o.pasta).trim())return;
+    o.tipo=String(o.tipo||'').trim();o.tipo=o.tipo?o.tipo[0].toUpperCase()+o.tipo.slice(1).toLowerCase():'';
+    o.mes=String(o.mes||'').trim();o.status=cleanStatus(o.status);
+    o.hay=norm([o.pasta,o.end,o.tipo,o.mes,o.status,o.prop,o.inq,o.obs].join(' '));
+    out.push(o);
+  });
+  return out;
+}
+
+function opts(el,label,vals){el.innerHTML=`<option value="">${label}</option>`+vals.map(v=>`<option>${esc(v)}</option>`).join('')}
+function setup(){
+  $('upBox').classList.add('hide');$('app').classList.remove('hide');
+  const uniq=k=>[...new Set(rows.map(r=>r[k]).filter(Boolean))];
+  const sts=uniq('status');
+  $('chips').innerHTML=['Todos',...sts].map((s,i)=>`<button class="chip${i?'':' on'}" data-s="${i?esc(s):''}">${esc(s)}</button>`).join('');
+  opts($('tipo'),'Todos os tipos',uniq('tipo').sort());
+  const meses=uniq('mes');opts($('mes'),'Todos os meses',meses);
+  state={status:'',tipo:'',mes:'',q:'',hoje:''};$('q').value='';render();
+}
+function render(){
+  const q=norm(state.q).split(' ').filter(Boolean);
+  const res=rows.filter(r=>(!state.hoje||isToday(r[state.hoje]))&&(!state.status||r.status===state.status)&&(!state.tipo||r.tipo===state.tipo)&&(!state.mes||r.mes===state.mes)&&q.every(t=>r.hay.includes(t)));
+  renderQuick();$('cnt').textContent=`${res.length} de ${rows.length} imóveis${stamp?' · '+stamp:''}`;
+  $('list').innerHTML=res.length?res.map(card).join(''):'<div class="empty">Nenhum imóvel encontrado.</div>';
+}
+function f(label,val){return val?`<div><span>${label}</span><b>${esc(val)}</b></div>`:''}
+function d(label,val,raw){return val?`<div><span>${label}</span>${raw?val:esc(val)}</div>`:''}
+function card(r){
+  const grid=f('Aviso',fDate(r.aviso))+f('Entrega das chaves',fDate(r.chaves))+f('Valor desocupação',fMoney(r.vdes))+f('Nova locação',fMoney(r.vloc))+f('Venda',fMoney(r.vven))+f('Condomínio',fMoney(r.cond))+f('IPTU',fMoney(r.iptu));
+  const det=d('Proprietário',r.prop)+d('Tel. proprietário',tel(r.tprop),1)+d('Inquilino',r.inq)+d('Tel. inquilino',tel(r.tinq),1)+d('Reparos',fMoney(r.rep))+d('Motivo dos reparos',r.mrep)+d('Status dos reparos',r.srep)+d('Observação',r.obs);
+  return `<div class="card"><div class="top"><div><div class="pasta">Pasta ${esc(r.pasta)} · ${esc(r.mes)}</div><div class="end">${esc(r.end)}</div><div class="sub">${esc(r.tipo)}</div></div><div class="badge ${badgeCls(r.status)}">${esc(r.status)}</div></div><div class="grid">${grid}</div>${det?`<details><summary>Mais detalhes</summary><div class="det">${det}</div></details>`:''}</div>`;
+}
+
+function isToday(v){const t=new Date();let d=null;if(v instanceof Date&&!isNaN(v))d=v;else if(typeof v==='string'){const m=v.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m)d=new Date(+m[3],m[2]-1,+m[1])}return !!d&&d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate()}
+function renderQuick(){const a=rows.filter(r=>isToday(r.aviso)).length,c=rows.filter(r=>isToday(r.chaves)).length;$('quick').innerHTML=`<button class="chip q${state.hoje==='aviso'?' on':''}" data-h="aviso">📩 Avisos de hoje (${a})</button><button class="chip q${state.hoje==='chaves'?' on':''}" data-h="chaves">🔑 Chaves de hoje (${c})</button>`}
+function effDark(){const t=document.documentElement.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches}
+function applyTheme(t){document.documentElement.dataset.theme=t;$('themeBtn').textContent=t==='dark'?'☀️ Claro':'🌙 Escuro';try{localStorage.setItem('tema',t)}catch(e){}}
+let savedTheme=null;try{savedTheme=localStorage.getItem('tema')}catch(e){}
+applyTheme(savedTheme||(effDark()?'dark':'light'));
+$('themeBtn').addEventListener('click',()=>applyTheme(effDark()?'light':'dark'));
+$('swap').addEventListener('click',()=>$('upBox').classList.toggle('hide'));
+$('quick').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;state.hoje=state.hoje===b.dataset.h?'':b.dataset.h;render()});
+function load(buf,name){
+  const wb=XLSX.read(buf,{type:'array',cellDates:true});
+  rows=parse(wb);
+  stamp='Arquivo: '+name;
+  setup();
+}
+$('f').addEventListener('change',e=>{
+  const file=e.target.files[0];if(!file)return;
+  const rd=new FileReader();
+  rd.onload=ev=>{try{load(ev.target.result,file.name);$('upBox').classList.add('hide')}catch(err){alert('Não consegui ler a planilha: '+err.message)}};
+  rd.readAsArrayBuffer(file);e.target.value='';
+});
+$('q').addEventListener('input',e=>{state.q=e.target.value;render()});
+$('tipo').addEventListener('change',e=>{state.tipo=e.target.value;render()});
+$('mes').addEventListener('change',e=>{state.mes=e.target.value;render()});
+$('chips').addEventListener('click',e=>{
+  const b=e.target.closest('.chip');if(!b)return;
+  document.querySelectorAll('#chips .chip').forEach(c=>c.classList.remove('on'));b.classList.add('on');
+  state.status=b.dataset.s;render();
+});
+if(typeof XLSX==='undefined'){$('upBox').innerHTML='<p>Sem conexão com a internet para carregar o leitor de planilhas. Conecte-se e recarregue a página.</p>'}
+</script>
+</body>
+</html>
