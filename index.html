@@ -87,6 +87,7 @@ function parse(wb){
   if(!json.length)throw new Error('Planilha vazia');
   const heads=Object.keys(json[0]);const map={};
   for(const k in COLS){map[k]=heads.find(h=>norm(h).startsWith(COLS[k]))}
+  if(!map.pasta)map.pasta=heads.find(h=>norm(h).includes('pasta'));
   const out=[];
   json.forEach(r=>{
     const o={};for(const k in map)o[k]=map[k]?r[map[k]]:'';
